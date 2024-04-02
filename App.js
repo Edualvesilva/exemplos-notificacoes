@@ -1,8 +1,11 @@
 import { Button, StatusBar, StyleSheet, Text, View } from "react-native";
+
+/* Importando os recursos para notificação */
 import * as Notifications from "expo-notifications";
+
 import { useState, useEffect } from "react";
 
-/* Manipulador de Eventos de notificações */
+/* Manipulador de eventos de notificações */
 Notifications.setNotificationHandler({
   handleNotification: async () => {
     return {
@@ -17,51 +20,65 @@ export default function App() {
   const [dados, setDados] = useState(null);
 
   useEffect(() => {
+    /* Verificações/configurações de permissão de notificação
+    exclusivas para iOS */
     async function permissoesIos() {
       return await Notifications.requestPermissionsAsync({
-        ios: { allowAlert: true, allowBadge: true, allowSound: true },
+        ios: {
+          allowAlert: true,
+          allowSound: true,
+          allowBadge: true,
+        },
       });
     }
+
     permissoesIos();
 
-    /* Ouvinte de evento para as notificações recebidas,ou seja, quando a notificação aparece no topo do app */
+    /* Ouvinte de evento para notificações recebidas, ou seja,
+    quando a notificação aparece no topo do app. */
     Notifications.addNotificationReceivedListener((notificacao) => {
       console.log(notificacao);
     });
 
-    /* Ouvinte de evento para as respostas dadas às notificações , ou seja, quando o usuário interage (toca)  */
+    /* Ouvinte de evento para as respostas dadas às notificações,
+    ou seja, quando o usuário interage (toca) notificação. */
     Notifications.addNotificationResponseReceivedListener((resposta) => {
+      /* Capturando os dados vindos à partir da notificação */
       setDados(resposta.notification.request.content.data);
-      //console.log("Resposta: " + resposta);
     });
   }, []);
 
   const enviarMensagem = async () => {
-    /* Montando a mensagem que será enviada via sistema de notificação LOCAL */
+    /* Montando a mensagem que será enviada
+    via sistema de notificação LOCAL */
     const mensagem = {
-      title: "Lembrete!",
-      body: "Sou uma notificação daora",
+      title: "Lembrete! 😛",
+      body: "Não se esqueça de estudar muito... senão, reprova! ☠",
       data: {
-        usuario: "Chapolin",
+        usuario: "Chapolin Colorado 🤩",
         cidade: "São Paulo",
       },
     };
 
     /* Função de agendamento de notificações */
     await Notifications.scheduleNotificationAsync({
+      // Conteudo da notificação
       content: mensagem,
-      trigger: { seconds: 2 },
+
+      // acionador/disparador da notificação
+      trigger: { seconds: 5 },
     });
   };
 
   return (
     <>
-      <StatusBar style="auto" />
+      <StatusBar />
       <View style={styles.container}>
-        <Text>Exemplo de Notificação Local</Text>
-        <Button title="Disparar Notificação" onPress={enviarMensagem} />
+        <Text>Exemplo de notificação local</Text>
+        <Button title="Disparar notificação" onPress={enviarMensagem} />
+
         {dados && (
-          <View>
+          <View style={{ marginVertical: 8, backgroundColor: "yellow" }}>
             <Text>Usuário: {dados.usuario}</Text>
             <Text>Cidade: {dados.cidade}</Text>
           </View>
