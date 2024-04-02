@@ -30,11 +30,29 @@ export default function App() {
     });
 
     /* Ouvinte de evento para as respostas dadas às notificações , ou seja, quando o usuário interage (toca)  */
-    Notifications.addNotificationReceivedListener((resposta) => {
-      resposta;
+    Notifications.addNotificationResponseReceivedListener((resposta) => {
+      setDados(resposta.notification.request.content.data);
+      //console.log("Resposta: " + resposta);
     });
   }, []);
-  const enviarMensagem = () => {};
+
+  const enviarMensagem = async () => {
+    /* Montando a mensagem que será enviada via sistema de notificação LOCAL */
+    const mensagem = {
+      title: "Lembrete!",
+      body: "Sou uma notificação daora",
+      data: {
+        usuario: "Chapolin",
+        cidade: "São Paulo",
+      },
+    };
+
+    /* Função de agendamento de notificações */
+    await Notifications.scheduleNotificationAsync({
+      content: mensagem,
+      trigger: { seconds: 2 },
+    });
+  };
 
   return (
     <>
@@ -42,6 +60,12 @@ export default function App() {
       <View style={styles.container}>
         <Text>Exemplo de Notificação Local</Text>
         <Button title="Disparar Notificação" onPress={enviarMensagem} />
+        {dados && (
+          <View>
+            <Text>Usuário: {dados.usuario}</Text>
+            <Text>Cidade: {dados.cidade}</Text>
+          </View>
+        )}
       </View>
     </>
   );
